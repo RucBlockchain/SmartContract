@@ -133,7 +133,7 @@ func InitFSM(initStatus string) *fsm.FSM {
       {Name: "timeOut", Src: []string{"Bought"}, Dst: "Undeposited"},
       {Name: "insurCompanyDeposit", Src: []string{"Deposited"}, Dst: "Insuranced"},
       {Name: "timeOut", Src: []string{"Deposited"}, Dst: "Uninsuranced"},
-      {Name: "clientWithdraw", Src: []string{"Uninsuranced"}, Dst: "Client-Withdraw"},
+      {Name: "clientWithdraw", Src: []string{"Uninsuranced"}, Dst: "Client-Withdrawn"},
       {Name: "flightDelay", Src: []string{"Insuranced"}, Dst: "Delayed"},
       {Name: "indemnify", Src: []string{"Delayed"}, Dst: "Success"},
       {Name: "insurCompanyWithdraw", Src: []string{"Undelayed"}, Dst: "InsurCompany-Withdrawn"},
