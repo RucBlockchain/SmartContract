@@ -85,8 +85,10 @@ func (c *ContractChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response
 	function, args := stub.GetFunctionAndParameters()
 	fmt.Println("invoke is running " + function)
 
-  if function == "getRandBool" {
-    return c.getRandBool(stub)
+  if function == "check_buyTicket" {
+    return c.check_buyTicket(stub)
+  } else if function == "check_delay" {
+    return c.check_delay(stub)
   } else if function == "clientRegist" {
     return c.clientRegist(stub, args)
   } else if function == "insurCompanyRegist" {
