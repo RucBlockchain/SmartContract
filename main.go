@@ -7,7 +7,7 @@ import (
   "github.com/looplab/fsm"
 
   "github.com/hyperledger/fabric/core/chaincode/shim"
-	pb "github.com/hyperledger/fabric/protos/peer"
+  pb "github.com/hyperledger/fabric/protos/peer"
 )
 
 
@@ -63,7 +63,7 @@ type Order struct {
 //       Init - initializes chaincode
 // =========================================
 func (c *ContractChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
-	return shim.Success(nil)
+  return shim.Success(nil)
 }
 
 
@@ -72,9 +72,9 @@ func (c *ContractChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 // ============
 func main() {
   err := shim.Start(new(ContractChaincode))
-	if err != nil {
-		fmt.Printf("Error starting Contract chaincode: %s", err)
-	}
+  if err != nil {
+    fmt.Printf("Error starting Contract chaincode: %s", err)
+  }
 }
 
 
@@ -82,8 +82,8 @@ func main() {
 //       Invoke - Our entry point for Invocations
 // ======================================================
 func (c *ContractChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
-	function, args := stub.GetFunctionAndParameters()
-	fmt.Println("invoke is running " + function)
+  function, args := stub.GetFunctionAndParameters()
+  fmt.Println("invoke is running " + function)
 
   if function == "check_buyTicket" {
     return c.check_buyTicket(stub)
@@ -123,7 +123,7 @@ func (c *ContractChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response
     return shim.Error("Function doesn't exits, make sure function is right!")
   }
 
-	return shim.Success(nil)
+  return shim.Success(nil)
 }
 
 
