@@ -18,7 +18,9 @@ fsmEvent.go 包含与状态变迁相关的函数
     indemnify函数：当保单状态为Delayed并触发该函数时，保单状态会更改为Success。
     
 functions.go
-    clientRegist函数：用户登记函数，将用户的相关信息及公钥信息（Client结构体）存到链上，以“client”+ClientID拼接复合键作为Client的主键；
+    check_buyTicket函数：检查用户是否已经购票。
+    check_delay函数：检查航班是否延误。
+    clientRegist函数：用户登记函数，将用户的相关信息及公钥信息（Client结构体）存到链上，以“client”+ClientID拼接复合键作为Client的主键；
     insurCompanyRegist函数：保险公司登记函数，将保险公司信息及公钥信息（InsuranceCompany结构体）存到链上，以“company”+InsurompanyID拼接复合键作为InsuranceCompany的主键；
     writeOrder函数：当用户购票后，将用户的购票信息（Order结构体）存到链上，以“order”+OrderID拼接复合键作为Order的主键；
     initGuarantee函数：设置保单Guarantee的初始状态为Bought；
