@@ -49,7 +49,7 @@ echo "################### check_buyTicket ######################"
 echo "##########################################################"
 echo
 sleep 2
-boolValue=`peer chaincode query -n mycc -v 1.0 -c '{"Args":["getRandBool"]}' -C myc`
+boolValue=`peer chaincode query -n mycc -v 1.0 -c '{"Args":["check_buyTicket"]}' -C myc`
 echo $boolValue
 
 if [ "$boolValue" = "Query Result: false" ] ; then
@@ -87,19 +87,6 @@ else
   peer chaincode invoke -n mycc  -v 1.0 -c '{"Args":["initGuarantee","1"]}' -C myc
 
   sleep 3
-
-  #echo
-  #echo "##########################################################"
-  #echo "######################## timeOut #########################"
-  #echo "##########################################################"
-  #echo
-  #sleep 2
-  #peer chaincode invoke -n mycc  -v 1.0 -c '{"Args":["timeOut","1"]}' -C myc
-
-  #sleep 1
-  #echo "Client didn't deposit during the required time!"
-
-  #exit 1
 
   act2="{'Args':['clientDeposit','1','1','1','1','12:00']}"
   r2="2da67e2fe36b96be6f042c3e308396caaa6f83058e0a344f57a3bf725cd93aac"
@@ -177,7 +164,7 @@ else
   echo "##########################################################"
   echo
   sleep 2
-  boolValue=`peer chaincode query -n mycc  -v 1.0 -c '{"Args":["getRandBool"]}' -C myc`
+  boolValue=`peer chaincode query -n mycc  -v 1.0 -c '{"Args":["check_delay"]}' -C myc`
   echo $boolValue
 
   if [ "$boolValue" = "Query Result: true" ] ; then
