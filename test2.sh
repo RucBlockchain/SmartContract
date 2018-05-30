@@ -49,7 +49,7 @@ echo "################### check_buyTicket ######################"
 echo "##########################################################"
 echo
 sleep 2
-boolValue=`peer chaincode query -n mycc -v 1.0 -c '{"Args":["getRandBool"]}' -C myc`
+boolValue=`peer chaincode query -n mycc -v 1.0 -c '{"Args":["check_buyTicket"]}' -C myc`
 echo $boolValue
 
 if [ "$boolValue" = "Query Result: false" ] ; then
@@ -150,7 +150,7 @@ else
   echo "##########################################################"
   echo
   sleep 2
-  boolValue=`peer chaincode query -n mycc  -v 1.0 -c '{"Args":["getRandBool"]}' -C myc`
+  boolValue=`peer chaincode query -n mycc  -v 1.0 -c '{"Args":["check_delay"]}' -C myc`
   echo $boolValue
 
   if [ "$boolValue" = "Query Result: true" ] ; then
