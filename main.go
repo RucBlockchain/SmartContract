@@ -7,7 +7,7 @@ import (
   "github.com/looplab/fsm"
 
   "github.com/hyperledger/fabric/core/chaincode/shim"
-  pb "github.com/hyperledger/fabric/protos/peer"
+	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
 
@@ -15,9 +15,9 @@ type ContractChaincode struct {
 }
 
 
-// Guarantee结构体
-type Guarantee struct {
-  GuaranteeID           string       `json:"guaranteeID"`
+// Policy结构体
+type Policy struct {
+  PolicyID              string       `json:"policyID"`
   OrderID               string       `json:"orderID"`
   ClientID              string       `json:"clientID"`
   InsurCompanyID        string       `json:"insurCompanyID"`
@@ -34,7 +34,7 @@ type Client struct {
   ObjectType            string       `json:"objectType"`
   PublicKeyX            string       `json:"publicKeyX"`
   PublicKeyY            string       `json:"publicKeyY"`
-  Account               float64      `json:"account"`
+  Balance               float64      `json:"balance"`
 }
 
 
@@ -44,7 +44,7 @@ type InsuranceCompany struct {
   ObjectType            string       `json:"objectType"`
   PublicKeyX            string       `json:"publicKeyX"`
   PublicKeyY            string       `json:"publicKeyY"`
-  Account               float64      `json:"account"`
+  Balance               float64      `json:"balance"`
 }
 
 
@@ -63,7 +63,7 @@ type Order struct {
 //       Init - initializes chaincode
 // =========================================
 func (c *ContractChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
-  return shim.Success(nil)
+	return shim.Success(nil)
 }
 
 
@@ -72,9 +72,9 @@ func (c *ContractChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 // ============
 func main() {
   err := shim.Start(new(ContractChaincode))
-  if err != nil {
-    fmt.Printf("Error starting Contract chaincode: %s", err)
-  }
+	if err != nil {
+		fmt.Printf("Error starting Contract chaincode: %s", err)
+	}
 }
 
 
@@ -82,25 +82,25 @@ func main() {
 //       Invoke - Our entry point for Invocations
 // ======================================================
 func (c *ContractChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
-  function, args := stub.GetFunctionAndParameters()
-  fmt.Println("invoke is running " + function)
+	function, args := stub.GetFunctionAndParameters()
+	fmt.Println("invoke is running " + function)
 
   if function == "check_buyTicket" {
     return c.check_buyTicket(stub)
-  } else if function == "check_delay" {
-    return c.check_delay(stub)
+  } else if function == "check_flightDelay" {
+    return c.check_flightDelay(stub)
   } else if function == "clientRegist" {
     return c.clientRegist(stub, args)
   } else if function == "insurCompanyRegist" {
     return c.insurCompanyRegist(stub, args)
-  } else if function == "writeOrder" {
-    return c.writeOrder(stub, args)
-  } else if function == "initGuarantee" {
-    return c.initGuarantee(stub, args)
+  } else if function == "buyTicket" {
+    return c.buyTicket(stub, args)
+  } else if function == "initPolicy" {
+    return c.initPolicy(stub, args)
   } else if function == "queryByObjectType" {
     return c.queryByObjectType(stub, args)
-  } else if function == "queryGuarantee" {
-    return c.queryGuarantee(stub, args)
+  } else if function == "queryPolicy" {
+    return c.queryPolicy(stub, args)
   } else if function == "queryOrder" {
     return c.queryOrder(stub, args)
   } else if function == "queryState" {
@@ -109,21 +109,21 @@ func (c *ContractChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response
     return FsmEvent(stub, args, "clientDeposit")
   } else if function == "insurCompanyDeposit" {
     return FsmEvent(stub, args, "insurCompanyDeposit")
-  } else if function == "clientWithdraw" {
-    return FsmEvent(stub, args, "clientWithdraw")
+  } else if function == "clientRefund" {
+    return FsmEvent(stub, args, "clientRefund")
   } else if function == "flightDelay" {
     return FsmEvent(stub, args, "flightDelay")
-  } else if function == "insurCompanyWithdraw" {
-    return FsmEvent(stub, args, "insurCompanyWithdraw")
-  } else if function == "indemnify" {
-    return FsmEvent(stub, args, "indemnify")
+  } else if function == "insurCompanyRefund" {
+    return FsmEvent(stub, args, "insurCompanyRefund")
+  } else if function == "compensate" {
+    return FsmEvent(stub, args, "compensate")
   } else if function == "timeOut" {
     return FsmEvent(stub, args, "timeOut")
   } else {
     return shim.Error("Function doesn't exits, make sure function is right!")
   }
 
-  return shim.Success(nil)
+	return shim.Success(nil)
 }
 
 
@@ -135,10 +135,10 @@ func InitFSM(initStatus string) *fsm.FSM {
       {Name: "timeOut", Src: []string{"Bought"}, Dst: "Undeposited"},
       {Name: "insurCompanyDeposit", Src: []string{"Deposited"}, Dst: "Insuranced"},
       {Name: "timeOut", Src: []string{"Deposited"}, Dst: "Uninsuranced"},
-      {Name: "clientWithdraw", Src: []string{"Uninsuranced"}, Dst: "Client-Withdrawn"},
+      {Name: "clientRefund", Src: []string{"Uninsuranced"}, Dst: "ClientRefund"},
       {Name: "flightDelay", Src: []string{"Insuranced"}, Dst: "Delayed"},
-      {Name: "indemnify", Src: []string{"Delayed"}, Dst: "Success"},
-      {Name: "insurCompanyWithdraw", Src: []string{"Undelayed"}, Dst: "InsurCompany-Withdrawn"},
+      {Name: "compensate", Src: []string{"Delayed"}, Dst: "Success"},
+      {Name: "insurCompanyRefund", Src: []string{"Undelayed"}, Dst: "InsurCompanyRefund"},
     },
     fsm.Callbacks{},
   )
@@ -150,14 +150,14 @@ func FsmEvent(stub shim.ChaincodeStubInterface, args []string, event string) pb.
   var resError pb.Response
   var str string
 
-  guaranteeID := args[0]
-  bstatus, err := stub.GetState(guaranteeID)         //从StateDB中读取对应表单的状态
+  policyID := args[0]
+  bstatus, err := stub.GetState(policyID)         //从StateDB中读取对应表单的状态
   if err != nil{
-    return shim.Error("Query guarantee status fail, guarantee ID: " + guaranteeID)
+    return shim.Error("Query policy status fail, policy ID: " + policyID)
   }
 
   status := string(bstatus)
-  fmt.Println("Guarantee[" + guaranteeID + "] status:" + status)
+  fmt.Println("Policy[" + policyID + "] status:" + status)
   //f := InitFSM(status)        //初始化状态机，并设置当前状态为表单的状态
   err = f.Event(event)          //触发状态机的事件
   if err != nil{
@@ -167,10 +167,10 @@ func FsmEvent(stub shim.ChaincodeStubInterface, args []string, event string) pb.
       case "clientDeposit": resError, str = clientDeposit(stub, args)
       case "insurCompanyDeposit": resError, str = insurCompanyDeposit(stub, args)
       case "flightDelay": resError, str = changeOrder(stub, args)
-      case "indemnify": resError, str = indemnify(stub, args)
+      case "compensate": resError, str = compensate(stub, args)
       case "timeOut": str = "Done"
-      case "clientWithdraw": resError, str = clientWithdraw(stub, args)
-      case "insurCompanyWithdraw": resError, str = insurCompanyWithdraw(stub, args)
+      case "clientRefund": resError, str = clientRefund(stub, args)
+      case "insurCompanyRefund": resError, str = insurCompanyRefund(stub, args)
       default : resError = shim.Error("No event matches!!!")
     }
 
@@ -180,6 +180,6 @@ func FsmEvent(stub shim.ChaincodeStubInterface, args []string, event string) pb.
   }
   status = f.Current()
   fmt.Println("New status:" + status + "\n")
-  stub.PutState(guaranteeID, []byte(status))        //更新表单的状态
+  stub.PutState(policyID, []byte(status))        //更新表单的状态
   return shim.Success([]byte(status));              //返回新状态
 }
