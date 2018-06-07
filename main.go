@@ -7,7 +7,7 @@ import (
   "github.com/looplab/fsm"
 
   "github.com/hyperledger/fabric/core/chaincode/shim"
-  pb "github.com/hyperledger/fabric/protos/peer"
+	pb "github.com/hyperledger/fabric/protos/peer"
 )
 
 
@@ -63,7 +63,7 @@ type Order struct {
 //       Init - initializes chaincode
 // =========================================
 func (c *ContractChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
-  return shim.Success(nil)
+	return shim.Success(nil)
 }
 
 
@@ -72,9 +72,9 @@ func (c *ContractChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 // ============
 func main() {
   err := shim.Start(new(ContractChaincode))
-  if err != nil {
-    fmt.Printf("Error starting Contract chaincode: %s", err)
-  }
+	if err != nil {
+		fmt.Printf("Error starting Contract chaincode: %s", err)
+	}
 }
 
 
@@ -82,8 +82,8 @@ func main() {
 //       Invoke - Our entry point for Invocations
 // ======================================================
 func (c *ContractChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
-  function, args := stub.GetFunctionAndParameters()
-  fmt.Println("invoke is running " + function)
+	function, args := stub.GetFunctionAndParameters()
+	fmt.Println("invoke is running " + function)
 
   if function == "check_buyTicket" {
     return c.check_buyTicket(stub)
@@ -123,7 +123,7 @@ func (c *ContractChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response
     return shim.Error("Function doesn't exits, make sure function is right!")
   }
 
-  return shim.Success(nil)
+	return shim.Success(nil)
 }
 
 
@@ -146,6 +146,9 @@ func InitFSM(initStatus string) *fsm.FSM {
 }
 
 
+var fMap = make(map[string]*fsm.FSM)
+
+
 func FsmEvent(stub shim.ChaincodeStubInterface, args []string, event string) pb.Response{
   var resError pb.Response
   var str string
@@ -159,9 +162,10 @@ func FsmEvent(stub shim.ChaincodeStubInterface, args []string, event string) pb.
   status := string(bstatus)
   fmt.Println("Policy[" + policyID + "] status:" + status)
   //f := InitFSM(status)        //初始化状态机，并设置当前状态为表单的状态
-  err = f.Event(event)          //触发状态机的事件
+  f := fMap[policyID]
+  err = f.Event(event)        //触发状态机的事件
   if err != nil{
-    return shim.Error("Current status is " + status + " does not support envent:" + event)
+    return shim.Error("Current status is " + status + " not support envent:" + event)
   } else {
     switch event {
       case "clientDeposit": resError, str = clientDeposit(stub, args)
@@ -178,8 +182,38 @@ func FsmEvent(stub shim.ChaincodeStubInterface, args []string, event string) pb.
       return resError
     }
   }
+
+  stub.PutState(policyID, []byte(status))        //更新表单的状态
   status = f.Current()
   fmt.Println("New status:" + status + "\n")
+  return shim.Success([]byte(status));                     //返回新状态
+}
+
+
+// =============================================================
+//        initPolicy - set policy init status Bought
+// =============================================================
+func (c *ContractChaincode) initPolicy(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+  var f *fsm.FSM
+
+  //      0
+	// "PolicyID"
+  if len(args) != 1 {
+    return shim.Error("Incorrect number of arguments. Expecting 1")
+  }
+
+	if len(args[0]) <= 0 {
+		return shim.Error("1st argument must be a non-empty string")
+	}
+
+  policyID := args[0]
+
+  status := string("Bought")
+  fmt.Println("Policy[" + policyID + "] status:" + status)
+  f = InitFSM(status)        //初始化状态机，并设置当前状态为表单的状态
+
+	fMap[policyID] = f
+
   stub.PutState(policyID, []byte(status))        //更新表单的状态
-  return shim.Success([]byte(status));              //返回新状态
+  return shim.Success(nil)
 }
