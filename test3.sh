@@ -56,17 +56,17 @@ if [ "$boolValue" = "Query Result: false" ] ; then
   echo "Ticket has not been bought! EXIT!"
   exit 1
 else
-  act1="{'Args':['writeOrder','1','1','1','11:00']}"
-  r1="1a226fad62b8bb71681ece92b75daf512b0a08776493111074d77946a94020f3"
-  s1="f8d4d5314733be75fd4a30a49a4e8ae6f2229b97a2a52a91875e3634b58461da"
+  act1="{'Args':['buyTicket','1','1','1','11:00']}"
+  r1="f4ad4aac6c5b78405d69b1dcbdb75ee9ef21c68e6342f37305ddb6d2742f968c"
+  s1="45fd34af8d2f93131bbfa42bb7423844c6dc9ff3365f4590ac4e979c64650a9d"
 
   echo
   echo "##########################################################"
-  echo "###################### writeOrder ########################"
+  echo "####################### buyTicket ########################"
   echo "##########################################################"
   echo
   sleep 2
-  peer chaincode invoke -n mycc  -v 1.0 -c '{"Args":["writeOrder","1","1","1","11:00","'${act1}'","'${r1}'","'${s1}'"]}' -C myc
+  peer chaincode invoke -n mycc  -v 1.0 -c '{"Args":["buyTicket","1","1","1","11:00","'${act1}'","'${r1}'","'${s1}'"]}' -C myc
 
   sleep 3
 
@@ -80,11 +80,11 @@ else
 
   echo
   echo "##########################################################"
-  echo "################### initGuarantee ########################"
+  echo "##################### initPolicy #########################"
   echo "##########################################################"
   echo
   sleep 2
-  peer chaincode invoke -n mycc  -v 1.0 -c '{"Args":["initGuarantee","1"]}' -C myc
+  peer chaincode invoke -n mycc  -v 1.0 -c '{"Args":["initPolicy","1"]}' -C myc
 
   sleep 3
 
@@ -113,17 +113,17 @@ else
   sleep 1
   echo "Insurance company didn't deposit during the required time!"
 
-  act3="{'Args':['clientWithdraw','1','1']}"
-  r3="7f07f23f92181ca925fdf9007d484a4c7e81350abf90dd07d16d03478587e113"
-  s3="549ce354e70c55e3672801f186ec06ac77daf482f2ee63359a0fc7864e87f164"
+  act3="{'Args':['clientRefund','1','1']}"
+  r3="3b3fb6716cb7089a4edbb5a24e00a8d5b96ace91df54fa647614e52674279698"
+  s3="7a7a02e6869e4c7817de567c4795f9e6f85c964c5edf9dcb665924e11cceff35"
 
   echo
   echo "##########################################################"
-  echo "##################### clientWithdraw #####################"
+  echo "####################### clientRefund #####################"
   echo "##########################################################"
   echo
   sleep 2
-  peer chaincode invoke -n mycc  -v 1.0 -c '{"Args":["clientWithdraw","1","1","'${act3}'","'${r3}'","'${s3}'"]}' -C myc
+  peer chaincode invoke -n mycc  -v 1.0 -c '{"Args":["clientRefund","1","1","'${act3}'","'${r3}'","'${s3}'"]}' -C myc
 
   sleep 1
 
@@ -131,11 +131,11 @@ else
 
   echo
   echo "##########################################################"
-  echo "################### queryGuarantee #######################"
+  echo "##################### queryPolicy ########################"
   echo "##########################################################"
   echo
   sleep 2
-  peer chaincode query -n mycc -v 1.0 -c '{"Args":["queryByObjectType","guarantee"]}' -C myc
+  peer chaincode query -n mycc -v 1.0 -c '{"Args":["queryByObjectType","policy"]}' -C myc
 
   Act1="{'Args':['insurCompanyDeposit','1','1','1','1','12:00']}"
   R1="ab2dedda006dbfe57c10e900ddefa6ce59aa9896b9545884c2a781f85841f50f"
@@ -152,25 +152,25 @@ else
 
   echo
   echo "##########################################################"
-  echo "#################### queryGuarantee #######################"
+  echo "##################### queryPolicy ########################"
   echo "##########################################################"
   echo
   sleep 2
-  peer chaincode query -n mycc  -v 1.0 -c '{"Args":["queryByObjectType","guarantee"]}' -C myc
+  peer chaincode query -n mycc  -v 1.0 -c '{"Args":["queryByObjectType","policy"]}' -C myc
 
   echo
   echo "##########################################################"
-  echo "###################### check_delay #######################"
+  echo "################## check_flightDelay #####################"
   echo "##########################################################"
   echo
   sleep 2
-  boolValue=`peer chaincode query -n mycc  -v 1.0 -c '{"Args":["check_delay"]}' -C myc`
+  boolValue=`peer chaincode query -n mycc  -v 1.0 -c '{"Args":["check_flightDelay"]}' -C myc`
   echo $boolValue
 
   if [ "$boolValue" = "Query Result: true" ] ; then
     echo
     echo "##########################################################"
-    echo "###################### changeOrder #######################"
+    echo "###################### flightDelay #######################"
     echo "##########################################################"
     echo
     sleep 2
@@ -178,41 +178,43 @@ else
     peer chaincode invoke -n mycc  -v 1.0 -c '{"Args":["flightDelay","1","1","DELAY"]}' -C myc
 
     sleep 3
-    act4="{'Args':['indemnify','1','1']}"
-    r4="93daaf88c6b9af4ba2b18abe795b59f6433d6e359be69e500472b8e8c56941e2"
-    s4="19e9cc00056279b2a2b046b33591e0989e3316938d5318bb800754fc1d91191f"
+
+    act4="{'Args':['compensate','1','1']}"
+    r4="94ed96c29fdc2d9878c7086fcbd9f2746ff5010f9a657cb14ebf7c23134e1df7"
+    s4="88026c3364b7c14c072654710fb6e9a1a9a8155a397f85ae9edc1a0c30b7c68d"
+
     echo
     echo "##########################################################"
-    echo "####################### indemnify ########################"
+    echo "###################### compensate ########################"
     echo "##########################################################"
     echo
     sleep 2
 
-    peer chaincode invoke -n mycc  -v 1.0 -c '{"Args":["indemnify","1","1","'${act4}'","'${r4}'","'${s4}'"]}' -C myc
+    peer chaincode invoke -n mycc  -v 1.0 -c '{"Args":["compensate","1","1","'${act4}'","'${r4}'","'${s4}'"]}' -C myc
 
     sleep 3
 
-    echo "Indemnify successfully"
-    exit 1
+    echo "Compensate successfully"
+    #exit 1
   else
 
-    Act2="{'Args':['insurCompanyWithdraw','1','1']}"
-    R2="d65dc39e946181322baeef3bd1e08689cd7d383180dafee0074eae88ef714b20"
-    S2="d4f8acef0fb9279c123b449f390eb724a1cf4c3084a34d15c2872bf56eaec958"
+    Act2="{'Args':['insurCompanyRefund','1','1']}"
+    R2="6d3d277c774632f5fa699762336a1581ebf54b823543ed7408a1add9cc4cea8"
+    S2="c290ecdf5f97bbe412ed60c5d167790abf81662f07333240928b56955b37c558"
 
     echo
     echo "##########################################################"
-    echo "############# insurance company withdraw #################"
+    echo "############### insurance company refund #################"
     echo "##########################################################"
     echo
     sleep 2
 
-    peer chaincode invoke -n mycc  -v 1.0 -c '{"Args":["insurCompanyWithdraw","1","1","'${Act2}'","'${R2}'","'${S2}'"]}' -C myc
+    peer chaincode invoke -n mycc  -v 1.0 -c '{"Args":["insurCompanyRefund","1","1","'${Act2}'","'${R2}'","'${S2}'"]}' -C myc
 
     sleep 3
 
-    echo "Withdraw successfully"
-    exit 1
+    echo "Refund successfully"
+    #exit 1
   fi
 
   echo
