@@ -1,0 +1,8 @@
+{
+    "host": "0.0.0.0",
+    "port": "5100",
+    "debug": "True",
+    "user": "root",
+    "password": "451284296",
+    "database": "contract"
+}

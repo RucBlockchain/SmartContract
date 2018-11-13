@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8" />
+        <title>lookup</title>
+        <link href="../static/css/style.css" rel="stylesheet" type="text/css" media="all" />    
+        <link href="../static/css/bootstrap.min.css" rel="stylesheet" type="text/css" media="all" />  
+        <link rel="stylesheet" href="./static/js/demo/tipsy.css">  
+        <script src="../static/js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/js/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="https://d3js.org/d3.v4.min.js" charset="utf-8"></script>
+        <script src="../static/js/dagre-d3.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/js/demo/tipsy.js"></script>
+    </head>
+
+    <style>
+        
+        #right {
+            width: 78%;
+            height: 550px;
+            margin: 0 auto;
+            margin-left:50px;
+            margin-right:0px;
+            border-style: solid; 
+            border-width: 5px;
+            border-color: rgba( 30,144,255,0.7);
+            border-radius: 30px;
+            font-family:"黑体";
+            font-size: 16px;
+            display: inline-block;
+            overflow: scroll;
+        }
+
+        button{
+            width:180px;           
+        }
+        .table th { 
+            text-align: center;
+            vertical-align: middle!important;
+        }
+        #table td { 
+            text-align: left;
+        }
+        text {
+          font-weight: 300;
+          font-family: "Helvetica Neue", Helvetica, Arial, sans-serf;
+          font-size: 14px;
+        }
+        body {
+        }
+
+        .edgePath path {
+          stroke: #333;
+          fill: #333;
+          stroke-width: 1.5px;
+        }
+    
+
+        .node text {
+          pointer-events: none;
+          color: "#333";
+        }
+
+        /* This styles the title of the tooltip */
+        .tipsy .name {
+          font-size: 1.5em;
+          font-weight: bold;
+          color: #60b1fc;
+          margin: 0;
+        }
+
+        table {
+          border-spacing: 0;
+        }
+
+        table td {
+          padding: 7px;
+        }
+
+        /* This styles the body of the tooltip */
+        .tipsy .description {
+          font-size: 1.3em;
+          font-weight: bold;
+          margin: 0;
+        }
+
+        .node rect {
+            stroke: #333;
+            fill: #fff;
+            stroke-width: 1.5px;
+        }       
+
+    </style>
+
+    <body id="bodyid">
+        <div class="header" id="header">
+            <div class="container" >
+                <div class="nav-top">
+                    <!-- Brand and toggle get grouped for better mobile display -->
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <div class="navbar-brand logo ">
+                            <img src="../static/images/logo.png" alt=" " class="img-responsive" height="120" width="120"/> 
+                        </div>
+                    </div>
+                    <!-- Collect the nav links, forms, and other content for toggling -->
+                        <div class="collapse navbar-collapse nav-wil links" id="bs-example-navbar-collapse-1">
+                            <ul class="nav navbar-nav ">
+                                <br><br>
+                                <br><br>
+                                <li style="font-size: 20px;">{{ contract[1] }}</li>
+                            </ul>
+                        <div class="clearfix"></div>
+                        <br><br>
+                        </div><!-- /.navbar-collapse -->
+                </div>
+            </div>
+        </div>
+        <br>
+
+        <div class="team" id="template">
+        <div class="container">
+            <div class="about-w3l w3agile">
+                <div id="center" style="margin-bottom:5% ;">
+                    <div id='left' style="width: 15%;display: inline-block;margin-left: 0%;float: left;">
+                        <br><br>
+                        <div>
+                            <form action="/contract" method="post">
+                                <input type="hidden" id="hint" name="username" value="{{ contract[1] }}">
+                                <button type="submit" class="btn btn-warning">新建合约</button>
+                            </form>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <form action="/file" method="post">
+                                <input type="hidden" name="username" value="{{ contract[1] }}">
+                                <button type="submit" class="btn btn-default">所有合约</button>
+                            </form>
+                        </div>
+                        <br>
+
+                        <div style="margin-top: 20px;">                     
+                            <button type="submit" class="btn btn-default" onclick="create()">生成状态机</button>
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                               <!-- <button type="submit" class="btn btn-default" onclick="code()">生成合约代码</button> -->
+                            <select id="code-type" class="form-control" style="width: 180px; height: 38px;text-align:center;text-align-last:center">
+                              <option selected="">生成合约代码</option>
+                              <option value="0">生成fabric链码</option>
+                              <option value="1">生成以太坊智能合约</option>
+                            </select>
+
+                        </div>
+
+                    </div >
+                    <div id='right'> 
+                        <div id="back" style="margin-bottom:7% ;">
+                            <br>
+                            <font style="font-size:32px" align="center"><b>合约内容</b></font>
+                            <br><br>
+                          
+                            <div id="table" style="margin-left: 38px;">
+                                <table style="border-collapse:separate; border-spacing:10px;">
+                                    <tr>
+                                        <td align="left">
+                                            <b>名称：</b>{{ contract[2] }}
+                                        </td>
+                                        <td>
+                                            &emsp;&emsp;&emsp;
+                                            <b>编号：</b>{{ contract[3] }}
+                                    </tr>
+                                    <tr>
+                                        <td lign="left">
+
+                                            <b>甲方：</b>{{ contract[4] }}
+                                        </td>
+                                        <td>
+                                            &emsp;&emsp;&emsp;
+                                            <b>乙方：</b>{{ contract[6] }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <b>生效时间：</b>{{ contract[8] }}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div align="left" style="margin-left: 48px; margin-top: 10px;width: 43%">
+                                <b>标的物描述：</b>{{ contract[10] }}
+                            </div>
+
+
+                            <table class="table">
+                              <br>
+                              <thead>
+                                <tr>
+                                  <th>条款序号</th>
+                                  <th>承诺方向</th>
+                                  <th>前提条件</th>
+                                  <th>达成结果</th>
+                                  <th>期限</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {% for l in list %}
+                                    <tr>
+                                      <td>{{ loop.index0+1 }}</td>
+                                      <td>{{ l['person'] }}</td>
+                                      <td width="245px" style="word-break:break-all;">{{ l['premise'] }}</td>
+                                      <td>{{ l['res'] }}</td>
+                                      <td>{{ l['time'] }}</td>
+                                    </tr>
+                                {% endfor %}
+                              </tbody>
+                            </table> 
+                        </div>        
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </body>
+
+    <script type="text/javascript">
+
+        var id = ""
+        var fsm = {}
+        function create() {
+            let state_array = fsm['FsmArray']
+            let size = state_array.length 
+            var g = new dagreD3.graphlib.Graph().setGraph({});
+
+
+            let state = new Set()
+
+            for (let i = 0; i < size; i++) {
+              state.add(state_array[i]['CurrentStatus'])
+              state.add(state_array[i]['NewStatus'])
+            }
+            
+            state_ar = Array.from(state)
+
+            state_enum = {'1':'激活', '2':'就绪', '3':'满足', '4':'违约', '5':'延期'}
+            num = {'0':'一', '1':'二', '2':'三', '3':'四','4':'五', '5':'六','6':'七', '7':'八', 
+            '8':'九', '9':'十'}
+            let len = state_ar.length
+            let color = ['', '#e0ffff', '#ADFF2F','#00CD00', '#FFD700', '#FF6347']
+            //alert(len)
+            //alert(state_ar[3])
+            //var td_set = {}
+            for (let i = 0; i < len; i++) {
+                /*
+                var value = {}
+                value.label = state_ar[i]
+                value.rx = value.ry = 5
+                value.shape = "ellipse"
+                */
+                let state_list = JSON.parse(state_ar[i])
+                des = ""
+
+                for (let s in state_list) {
+                    des = des + "<br>条款" + num[String(s)]
+                    des = des + ' ' + state_enum[state_list[s]]
+                }
+               //value.description = des
+               //g.setNode(state_ar[i], value);
+                g.setNode(state_ar[i], {
+                    label: function(){
+                        let table = document.createElement("table");                        
+                        //tr = d3.select(table).append("tr");
+                        let tr = document.createElement('tr')
+                        table.style.cssText = 'border-style:hidden;color:#333;font-size:17px'
+                        for (let j = 0; j < state_list.length; j++) {
+                        //tr.append("<td>gh</td>");
+                            //let t = 'td_' + String(i) + String(j)
+                            //alert(state_list)
+                            td =  document.createElement("td");
+                            //alert(t)
+                            //alert(td_set[t])
+                            td.innerText = String(state_list[j])
+                            //alert(state_list[j])
+                            
+                            if (j == 0) {
+                                td.style.cssText = "background-color:" + color[state_list[j]] + "; border-top: 1.5px solid #333; border-left: 1.5px solid #333; border-bottom: 1.5px solid #333; border-radius: 5px 0 0 5px;"
+                            } else if (j == state_list.length-1) {
+                                td.style.cssText = "background-color:" + color[state_list[j]] + "; border-top: 1.5px solid #333; border-bottom: 1.5px solid #333; border-right: 1.5px solid #333;border-radius: 0 5px 5px 0;"
+                            } else {
+                                td.style.cssText = "background-color:" + color[state_list[j]] + "; border-top: 1.5px solid #333; border-bottom: 1.5px solid #333;"
+                            }
+                            
+                            //td.style.cssText = "background-color:" + color[state_list[j]] + "; border-top: 1px solid #333; border-bottom: 1px solid #333;"
+
+                            //td = "<td>zzz</td>"
+                            //alert($('#state_node').text)
+                            tr.append(td)
+                            //alert(color[state_list[j]])
+                        }
+                        table.append(tr)
+                        return table;
+                        
+                        /*
+                        var table = document.createElement("table");
+                        // 将结点表格设为无边框，将内部单元格td的弧度边框作为整体边框
+                        table.style.cssText = 'border-style:hidden;color:#333'
+                        
+                        //tr = d3.select(table).append("tr");
+                        tr = document.createElement('tr')
+
+                        //tr.append("<td>gh</td>");
+                        td1 =  document.createElement("td");
+                        td1.innerText = '3'
+
+                        td1.style.cssText = "background-color:#00CD00;border-top: 1.5px solid #333; border-left: 1.5px solid #333; border-bottom: 1.5px solid #333; border-radius: 5px 0 0 5px;"
+
+
+                        td2 =  document.createElement("td");
+                        td2.style.cssText = "background-color:#FF6347; border-top: 1.5px solid #333; border-right: 1.5px solid #333; border-bottom: 1.5px solid #333; border-radius: 0 5px 5px 0;"
+                        td2.innerText = '5'
+                        */
+
+                        //td = "<td>zzz</td>"
+                        //alert($('#state_node').text)
+                        tr.append(td1)
+                        tr.append(td2)
+                        table.append(tr)
+                        return table;
+                    },
+                    padding: 0,
+                    rx: 5,
+                    ry: 5,
+                    description: des
+                })
+            }
+            //alert(td_set['td_31'])
+
+            for (let i = 0; i < size; i++) {
+              g.setEdge(state_array[i]['CurrentStatus'], state_array[i]['NewStatus'], { label: state_array[i]['Action']});
+            }
+
+
+
+            $("#right").css('border-style', 'hidden')
+            $("#right").css('overflow', 'visible')
+
+            document.getElementById("right").innerHTML="<svg width=1140 height=560><g/></svg>";
+
+            var svg = d3.select("svg"),
+                inner = svg.select("g");
+
+            var zoom = d3.zoom().on("zoom", function() {
+              inner.attr("transform", d3.event.transform);
+            });
+            svg.call(zoom);
+            // Set up zoom support
+
+            // Create the renderer
+            var render = new dagreD3.render();
+
+            // Run the renderer. This is what draws the final graph.
+            render(inner, g);
+
+        var styleTooltip = function(name, description) {
+          return "<p class='name'>" + name + "</p><p class='description'>" + description + "</p>";
+        };
+            
+            inner.selectAll("g.node")
+          .attr("title", function(v) { return styleTooltip(v, g.node(v).description) })
+           .each(function(v) { $(this).tipsy({ gravity: "w", opacity: 1, html: true }); });
+
+    
+
+        var initialScale = 0.7;
+        //alert(svg.attr("width"))
+        //alert(g.graph().width)
+        svg.call(zoom.transform, d3.zoomIdentity.translate((svg.attr("width") - g.graph().width * initialScale) / 2 +5, 50).scale(initialScale));
+
+        //svg.attr('height', g.graph().height * initialScale + 40);
+
+    }
+
+    function code(type) {
+        var div = $("#right");
+        div.text('')
+        //div.append('<div id="Layer1" style="position:absolute; width:1px; height:526px; z-index:1; background-color: #000000;layer-background-color: #000000; border: 2px none #000000; margin-left: 26%; top: 266px"></div>')
+        div.append('<div id="code" style="text-align:left; margin-left:100px; margin-top:20px"></div>')
+        if (type == 0) {
+            $("#code").append(go_str)
+        } else {
+            $("#code").append(eth_str)
+        }
+        //alert(id)
+    }
+    var go_str = ''
+    var eth_str = ''
+    $(document).ready(function() {
+        var contract_id = "{{ contract[3] }}"
+        //alert(contract_id)
+        $.ajax({
+            async:"true",
+            type:"POST",
+            url:"/fsm",
+            data: {
+                "contract_id":contract_id,
+            },
+            success:function(data) {
+                let content = JSON.parse(data)
+                go_str = content['go']
+                eth_str = content['eth']
+                fsm = content['fsm']
+
+                //alert(fsm)
+            }
+        });
+
+        // 监听单选框，判断生成代码的类型
+        $("#code-type").change(function(){
+            let type = Number($(this).children('option:selected').val());
+            
+            //alert(maxWater)
+            //alert($("#rain1").attr('placeholder'))
+
+            $("#right").css('border-style', 'solid')
+            $("#right").css('overflow', 'scroll')
+
+            code(type)
+        });
+
+    });
+
+        
+    </script>
+</html>

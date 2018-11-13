@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8" />
+        <title>file</title>
+        <link href="../static/css/style.css" rel="stylesheet" type="text/css" media="all" />    
+        <link href="../static/css/bootstrap.min.css" rel="stylesheet" type="text/css" media="all" />    
+        <script src="../static/js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../static/js/jquery-1.11.1.min.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+
+    <style>
+        
+        #right {
+            width: 75%;
+            height: 550px;
+            margin: 0 auto;
+            margin-left:50px;
+            margin-right:0px;
+            border-style: solid; 
+            border-width: 5px;
+            border-color: rgba( 30,144,255,0.7);
+            border-radius: 30px;
+            font-family:"黑体";
+            font-size: 16px;
+            display: inline-block;
+        }
+        button{
+            width:180px;           
+        }
+        .table th { 
+            text-align: center;
+            vertical-align: middle!important;
+        }
+
+    </style>
+
+    <body>
+        <div class="header" id="header">
+            <div class="container" >
+                <div class="nav-top">
+                    <!-- Brand and toggle get grouped for better mobile display -->
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <div class="navbar-brand logo ">
+                            <img src="../static/images/logo.png" alt=" " class="img-responsive" height="120" width="120"/> 
+                        </div>
+                    </div>
+                    <!-- Collect the nav links, forms, and other content for toggling -->
+                        <div class="collapse navbar-collapse nav-wil links" id="bs-example-navbar-collapse-1">
+                            <ul class="nav navbar-nav ">
+                                <br><br>
+                                <br><br>
+                                <li style="font-size: 20px;"><a href="#" onclick="$('#user').submit()">{{ username }}</a></li>
+                            </ul>
+                        <div class="clearfix"></div>
+                        </div><!-- /.navbar-collapse -->
+                </div>
+            </div>
+        </div>
+        <br>
+        <form id="user" action="/user" method="post">
+            <input type="hidden" name="username" value="{{ username }}">
+        </form>
+
+
+        <div class="team" id="template">
+        <div class="container">
+            <div class="about-w3l w3agile">
+                <div id="center" style="margin-bottom:5% ;">
+                    <div id='left' style="width: 15%;display: inline-block;margin-left: 0%;float: left;">
+                        <br><br>
+                        <div>
+                            <form action="/contract" method="post">
+                                <input type="hidden" id="hint" name="username" value="{{ username }}">
+                                <button type="submit" class="btn btn-warning">新建合约</button>
+                            </form>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <button type="button" class="btn btn-default">所有合约</button>
+                        </div > 
+                    </div >
+
+                    <div id='right' style=" overflow:scroll; "> 
+                        <table class="table table-hover" id="table">
+                          <br>
+                          <thead>
+                            <tr>
+                              <th>编号</th>
+                              <th>合约名称</th>
+                              <th>甲方</th>
+                              <th>乙方</th>
+                              <th>生效时间</th>
+                              <th>操作</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for l in contracts %}
+                                <tr>
+                                  <td>{{ l[0] }}</td>
+                                  <td>{{ l[1] }}</td>
+                                  <td>{{ l[2] }}</td>
+                                  <td>{{ l[3] }}</td>
+                                  <td>{{ l[4] }}</td>
+                                  <td><a href="#" class="scroll" onclick="submit({{ loop.index0 }})">查看</a></td>
+                                </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>                       
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form id="form" action="/query" method="post">
+            <input type="hidden" id="name" name="username" value="">
+            <input type="hidden" id="contract_id" name="contract_id" value="">
+        </form>
+    </body>
+
+    <script type="text/javascript">
+        function submit(i) {
+            var username = $("#hint").val();
+            var id = $("#table").find("tr").eq(i+1).find("td").eq(0).text()
+            $("#name").val(username)
+            $("#contract_id").val(id)
+            $("#form").submit()
+        }
+    </script>
+</html>
